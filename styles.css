@@ -19,3 +19,16 @@
 .viewer-playback select{min-width:0;border:1px solid var(--line);border-radius:9px;background:var(--paper2);color:var(--ink);font:500 11px 'DM Sans',system-ui,sans-serif;padding:6px 8px}
 .viewer-playback #viewerPhaseText{font-family:'DM Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.03em;color:var(--muted)}
 /* The phase label always owns a full row, so a mid-word ellipsis can never hide the phase name. */
+
+/* Camera view options: flip preview (display only) and Focus mode (camera as the main panel). */
+#cameraVideo.is-flipped,#handOverlay.is-flipped{transform:scaleX(-1)}
+.camera-view-actions{display:flex;gap:8px;margin-top:8px}
+.camera-view-actions .button{flex:1;font-size:12px;padding:9px 8px}
+.camera-view-actions .button[aria-pressed="true"]{background:#e7dff8;border-color:#8f73ce}
+@media(min-width:951px){
+  .workspace.focus-camera{grid-template-columns:minmax(200px,240px) minmax(0,1fr) minmax(300px,400px)}
+  .workspace.focus-camera .practice-sidebar{grid-column:2;grid-row:1;border-left:0;border-right:1px solid var(--line)}
+  .workspace.focus-camera .learning-center{grid-column:3;grid-row:1}
+  .workspace.focus-camera .camera-box{aspect-ratio:16/9}
+}
+@media(max-width:950px){#focusCameraButton{display:none}}
