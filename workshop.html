@@ -51,7 +51,7 @@
       <div class="hud-item"><span class="hud-label">LEVEL</span><span id="hudLevel">0</span></div>
       <div class="hud-item"><span class="hud-label">CHAIN</span><span id="hudChains">0 / 11</span></div>
       <div class="hud-right">
-        <a class="btn btn-gold small" href="index.html#journal">MY JOURNAL</a>
+        <button id="journalButton" type="button" class="btn btn-gold small">MY JOURNAL</button>
         <span class="logo">crochet<span class="accent-soft">.py</span></span>
       </div>
     </header>
@@ -125,6 +125,33 @@
         </div>
 
       </aside>
+    </main>
+    <div class="bricks" aria-hidden="true"></div>
+  </section>
+
+
+  <!-- MY JOURNAL -->
+  <section id="journalScreen" class="screen journal" hidden aria-labelledby="journalTitle">
+    <header class="hud">
+      <div class="hud-item"><span class="hud-label">PLAYER</span><span id="journalPlayer">-</span></div>
+      <span class="logo">crochet<span class="accent-soft">.py</span></span>
+    </header>
+    <main class="journal-main">
+      <h1 id="journalTitle">MY JOURNAL</h1>
+      <p class="hint dark">Progresmu tersimpan di browser ini saja.</p>
+      <div class="stat-grid">
+        <div class="card stat"><span class="hud-label dark">LEVEL CLEAR</span><span id="statLevels" class="stat-num">0 / 6</span></div>
+        <div class="card stat"><span class="hud-label dark">CHAIN</span><span id="statChains" class="stat-num">0</span></div>
+        <div class="card stat"><span class="hud-label dark">LEVEL SEKARANG</span><span id="statNow" class="stat-num small-num">-</span></div>
+      </div>
+      <div class="card">
+        <h2>ACTIVITY LOG</h2>
+        <ol id="journalLog" class="log"></ol>
+      </div>
+      <div class="row">
+        <button id="journalBack" type="button" class="btn btn-gold big">◀ LANJUT MAIN</button>
+        <button id="journalReset" type="button" class="btn btn-light">RESET PROGRES WORKSHOP</button>
+      </div>
     </main>
     <div class="bricks" aria-hidden="true"></div>
   </section>

@@ -102,6 +102,18 @@ legend{margin-bottom:12px;font-size:10px}
 .guide-placeholder{font-size:8px;line-height:1.8;text-align:center;padding:8px;color:var(--muted)}
 .ok-text{color:var(--ok)}
 
+/* Journal */
+.journal-main{flex:1;width:100%;max-width:1000px;margin:0 auto;padding:36px 24px;display:flex;flex-direction:column;gap:22px}
+.journal-main h1{font-size:clamp(24px,4vw,40px);text-shadow:4px 4px 0 var(--white)}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px}
+.stat{gap:10px}
+.hud-label.dark{color:var(--mortar)}
+.stat-num{font-size:24px} .stat-num.small-num{font-size:12px;line-height:1.8}
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;max-height:320px;overflow:auto;font-size:9px;line-height:1.8}
+.log li{display:flex;justify-content:space-between;gap:12px;padding:8px 10px;background:var(--paper);border:3px solid var(--ink)}
+.log time{color:var(--muted);flex:none}
+.log .empty{justify-content:center;color:var(--muted)}
+
 /* Level up */
 .levelup{position:fixed;inset:0;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;z-index:10;padding:24px}
 .levelup-inner{display:flex;flex-direction:column;align-items:center;gap:30px;text-align:center}

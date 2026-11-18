@@ -2,7 +2,8 @@
 // Camera -> MediaPipe Hand Landmarker (JS) -> check_pose() in rules.py (Python via Pyodide) -> pixel UI.
 // Progress for chains and cleared levels is written into the main course's storage so "My journal" keeps it.
 
-const TASKS_VISION = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22';
+// 0.10.22 (used by the main course) is not published on npm, so the CDN 404s. 0.10.35 is the newest 0.10.x.
+const TASKS_VISION = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35';
 const HAND_MODEL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
 const PYODIDE = 'https://cdn.jsdelivr.net/npm/pyodide@314.0.8/';
 
@@ -141,7 +142,7 @@ let holdStart = 0;
 let holdDone = false;
 
 async function loadLandmarker() {
-  const mod = await import(TASKS_VISION + '/+esm');
+  const mod = await import(TASKS_VISION + '/vision_bundle.mjs');
   const files = await mod.FilesetResolver.forVisionTasks(TASKS_VISION + '/wasm');
   const opts = { baseOptions: { modelAssetPath: HAND_MODEL, delegate: 'GPU' }, runningMode: 'VIDEO', numHands: 2 };
   try { return await mod.HandLandmarker.createFromOptions(files, opts); }
@@ -305,6 +306,31 @@ function levelUp() {
   $('levelUpButton').focus();
 }
 
+// ---------- journal ----------
+function showJournal() {
+  const s = courseState();
+  $('journalPlayer').textContent = player.name || 'PLAYER';
+  $('statLevels').textContent = `${Math.min(player.level, LEVELS.length)} / ${LEVELS.length}`;
+  $('statChains').textContent = String(getChains());
+  $('statNow').textContent = player.level < LEVELS.length ? LEVELS[player.level].name : 'SEMUA CLEAR!';
+  const log = $('journalLog'); log.replaceChildren();
+  const events = (Array.isArray(s.events) ? s.events : []).slice(0, 40);
+  if (!events.length) log.append(el('li', 'empty', 'Belum ada catatan. Ayo main!'));
+  for (const ev of events) {
+    const li = el('li');
+    const when = ev.at ? new Date(ev.at).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+    li.append(el('span', null, [ev.title, ev.detail].filter(Boolean).join(' · ')), Object.assign(el('time', null, when), { dateTime: ev.at || '' }));
+    log.append(li);
+  }
+  $('gameScreen').hidden = true; $('welcomeScreen').hidden = true; $('journalScreen').hidden = false;
+  window.scrollTo(0, 0);
+}
+
+function hideJournal() {
+  $('journalScreen').hidden = true;
+  showGame();
+}
+
 // ---------- wiring ----------
 function showGame() {
   $('welcomeScreen').hidden = true; $('gameScreen').hidden = false;
@@ -325,6 +351,12 @@ function init() {
     showGame();
   });
   $('cameraButton').addEventListener('click', startCamera);
+  $('journalButton').addEventListener('click', showJournal);
+  $('journalBack').addEventListener('click', hideJournal);
+  $('journalReset').addEventListener('click', () => {
+    if (!confirm('Hapus progres level workshop? Hitungan chain di journal tetap ada.')) return;
+    player.level = 0; savePlayer(); journal('Workshop: progres di-reset'); showJournal();
+  });
   $('flipButton').addEventListener('click', () => {
     const on = $('cameraBox').classList.toggle('flipped');
     $('flipButton').setAttribute('aria-pressed', String(on));
