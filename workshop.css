@@ -91,7 +91,16 @@ legend{margin-bottom:12px;font-size:10px}
 .side{display:flex;flex-direction:column;gap:18px}
 .code{width:100%;min-height:200px;padding:12px;background:var(--ink);color:var(--sky);border:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;resize:vertical;tab-size:4}
 .big-number{min-width:60px;text-align:center;font-size:20px}
-.coach{min-height:56px;font-size:12px;box-shadow:6px 6px 0 var(--ink)}
+.coach{margin-left:auto;min-height:48px;font-size:11px}
+.rule-card{gap:8px;background:var(--paper)}
+.rule-line{font-size:10px;line-height:1.8}
+.rule-line .tag-ok{color:var(--ok)} .rule-line .tag-bad{color:var(--bad)}
+.guide{margin:0;gap:8px}
+.guide figcaption{font-size:10px}
+.guide-frame{height:170px;background:#F3E3EA;border:3px dashed var(--mortar);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.guide-frame img{width:100%;height:100%;object-fit:cover}
+.guide-placeholder{font-size:8px;line-height:1.8;text-align:center;padding:8px;color:var(--muted)}
+.ok-text{color:var(--ok)}
 
 /* Level up */
 .levelup{position:fixed;inset:0;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;z-index:10;padding:24px}

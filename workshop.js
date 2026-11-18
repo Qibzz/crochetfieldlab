@@ -11,6 +11,7 @@ const WORKSHOP_STORE = 'crochetpy-workshop-v1';       // player name, hand, leve
 const HOLD_MS = 3000;          // pose must stay OK this long
 const TRACK_EVERY_MS = 100;    // ~10 checks per second
 const CHAIN_TARGET = 11;
+const GUIDE_DIR = 'guide/'; // put guide/level-0.jpg ... level-5.jpg (photos or GIFs of the coach's hands)
 
 // MediaPipe labels handedness as if the image were a mirrored selfie.
 // Our preview is NOT mirrored, so a label of "Left" usually means the person's right hand.
@@ -219,6 +220,8 @@ function draw(hands, highlight, ok) {
 }
 
 function updateStatus(ok, msg, hands, pts, now) {
+  const rule = $('activeRule');
+  rule.replaceChildren(el('span', ok ? 'tag-ok' : 'tag-bad', ok ? '[OK] ' : '[!!] '), document.createTextNode(msg));
   const status = $('statusText');
   status.textContent = msg.toUpperCase();
   status.className = 'status ' + (ok ? 'ok' : 'bad');
@@ -268,11 +271,22 @@ function renderLevels() {
   const lv = LEVELS[Math.min(player.level, LEVELS.length - 1)];
   $('hudLevel').textContent = String(player.level);
   $('levelHelp').textContent = player.level >= LEVELS.length ? 'Semua level CLEAR! Kamu keren 🎉' : lv.help;
+  showGuide(Math.min(player.level, LEVELS.length - 1));
   $('chainCard').hidden = !lv.chains;
   $('coachButton').disabled = true;
   $('coachHint').textContent = lv.coach ? 'Tahan posisi 3 detik dulu, lalu panggil coach.' : 'Level ini naik otomatis setelah tahan 3 detik.';
   holdStart = 0; holdDone = player.level >= LEVELS.length; setHold(0);
   renderChains();
+}
+
+function showGuide(level) {
+  const img = $('guideImg'); const ph = $('guidePlaceholder');
+  ph.textContent = `[FOTO CONTOH] ${LEVELS[level].name}`;
+  ph.hidden = false; img.hidden = true;
+  img.onload = () => { img.hidden = false; ph.hidden = true; };
+  img.onerror = () => { img.hidden = true; ph.hidden = false; };
+  img.alt = `Contoh tangan coach: ${LEVELS[level].name}`;
+  img.src = `${GUIDE_DIR}level-${level}.jpg`;
 }
 
 function renderChains() {

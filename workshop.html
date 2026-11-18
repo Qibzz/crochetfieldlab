@@ -82,16 +82,27 @@
           <div class="hold-row">
             <span>TAHAN 3 DETIK</span>
             <div id="holdBar" class="hold-bar" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" aria-label="Progress tahan posisi"></div>
+            <button id="coachButton" type="button" class="btn btn-accent coach" disabled>COACH OK ✓</button>
           </div>
+          <p id="coachHint" class="hint">Tahan posisi 3 detik dulu, lalu panggil coach.</p>
           <p id="engineStatus" class="hint">Memuat Python…</p>
         </div>
       </section>
 
       <aside class="side" aria-label="Aturan dan coach">
-        <div class="card">
-          <h2>LEVEL INI</h2>
-          <p id="levelHelp" class="hint dark"></p>
+        <div class="card rule-card">
+          <h2>ATURAN AKTIF</h2>
+          <p id="activeRule" class="rule-line">Menunggu kamera…</p>
         </div>
+
+        <figure class="card guide">
+          <figcaption>TIRU TANGAN INI:</figcaption>
+          <div class="guide-frame">
+            <img id="guideImg" alt="" hidden />
+            <span id="guidePlaceholder" class="guide-placeholder"></span>
+          </div>
+          <p id="levelHelp" class="hint ok-text"></p>
+        </figure>
 
         <div class="card">
           <h2>BUKA rules.py</h2>
@@ -113,8 +124,6 @@
           </div>
         </div>
 
-        <button id="coachButton" type="button" class="btn btn-accent coach" disabled>COACH OK ✓</button>
-        <p id="coachHint" class="hint">Tahan posisi 3 detik dulu, lalu panggil coach.</p>
       </aside>
     </main>
     <div class="bricks" aria-hidden="true"></div>
