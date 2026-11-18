@@ -90,6 +90,10 @@ legend{margin-bottom:12px;font-size:10px}
 
 .side{display:flex;flex-direction:column;gap:18px}
 .code{width:100%;min-height:200px;padding:12px;background:var(--ink);color:var(--sky);border:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;resize:vertical;tab-size:4}
+.code{min-height:0}
+textarea.code{min-height:150px}
+.full-code summary{cursor:pointer;font-size:9px;min-height:44px;display:flex;align-items:center}
+.full-code pre{margin:0;max-height:260px;overflow:auto;white-space:pre;font-size:10px}
 .big-number{min-width:60px;text-align:center;font-size:20px}
 .coach{margin-left:auto;min-height:48px;font-size:11px}
 .rule-card{gap:8px;background:var(--paper)}

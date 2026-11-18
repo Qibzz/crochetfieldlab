@@ -105,14 +105,18 @@
         </figure>
 
         <div class="card">
-          <h2>BUKA rules.py</h2>
-          <label for="rulesEditor" class="sr-only">Kode rules.py</label>
-          <textarea id="rulesEditor" class="code" spellcheck="false" rows="10"></textarea>
+          <h2>OPREK rules.py</h2>
+          <label for="rulesEditor" class="hint dark">Ubah angkanya, lalu RUN:</label>
+          <textarea id="rulesEditor" class="code" spellcheck="false" rows="7"></textarea>
           <div class="row">
             <button id="runButton" type="button" class="btn btn-gold">▶ RUN</button>
             <button id="resetRulesButton" type="button" class="btn btn-light">RESET</button>
           </div>
           <p id="rulesMessage" class="hint" aria-live="polite">Nggak wajib di-RUN. Aturan bawaan sudah jalan.</p>
+          <details class="full-code">
+            <summary>LIHAT KODE LENGKAP</summary>
+            <pre id="rulesFull" class="code"></pre>
+          </details>
         </div>
 
         <div id="chainCard" class="card" hidden>

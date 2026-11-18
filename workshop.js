@@ -72,10 +72,22 @@ async function loadRulesSource() {
   return '';
 }
 
+const PARAM_START = '# === PARAMETER ===';
+const PARAM_END = '# === END PARAMETER ===';
+let defaultParams = '';
+
+function extractParams(src) {
+  const a = src.indexOf(PARAM_START), b = src.indexOf(PARAM_END);
+  if (a < 0 || b < 0) return '';
+  return src.slice(a + PARAM_START.length, b).trim() + '\n';
+}
+
 async function startPython() {
   defaultRules = await loadRulesSource();
-  const saved = readJSON(WORKSHOP_STORE + '-rules', null);
-  $('rulesEditor').value = typeof saved === 'string' && saved.trim() ? saved : defaultRules;
+  defaultParams = extractParams(defaultRules);
+  $('rulesFull').textContent = defaultRules || '(rules.py tidak bisa dimuat)';
+  const saved = readJSON(WORKSHOP_STORE + '-params', null);
+  $('rulesEditor').value = typeof saved === 'string' && saved.trim() ? saved : defaultParams;
   try {
     const { loadPyodide } = await import(PYODIDE + 'pyodide.mjs');
     pyodide = await loadPyodide({ indexURL: PYODIDE });
@@ -87,11 +99,14 @@ async function startPython() {
   }
 }
 
-function runRules(code, silent = false) {
+// Runs the full rules.py, then the participant's parameter block on top of it.
+// check_pose() reads the module globals at call time, so new numbers take effect immediately.
+function runRules(params, silent = false) {
   if (!pyodide) return;
   try {
     const ns = pyodide.toPy({});
-    pyodide.runPython(code, { globals: ns });
+    pyodide.runPython(defaultRules, { globals: ns });
+    pyodide.runPython(params, { globals: ns });
     const fn = ns.get('check_pose');
     if (!fn) throw new Error('Fungsi check_pose() tidak ditemukan.');
     if (pyCheck) pyCheck.destroy();
@@ -99,10 +114,10 @@ function runRules(code, silent = false) {
     ns.destroy();
     engine = 'python';
     $('engineStatus').textContent = 'Aturan jalan di Python 🐍 (rules.py)';
-    if (!silent) { $('rulesMessage').textContent = 'Aturan baru dipakai! ✓'; writeJSON(WORKSHOP_STORE + '-rules', code); }
+    if (!silent) { $('rulesMessage').textContent = 'Angka baru dipakai! ✓'; writeJSON(WORKSHOP_STORE + '-params', params); }
   } catch (err) {
     const last = String(err?.message || err).trim().split('\n').filter(Boolean).pop();
-    $('rulesMessage').textContent = 'Ups, ada error: ' + last + ' — aturan lama tetap dipakai.';
+    $('rulesMessage').textContent = 'Ups, ada error: ' + last + ' — angka lama tetap dipakai.';
   }
 }
 
@@ -363,10 +378,10 @@ function init() {
   });
   $('runButton').addEventListener('click', () => runRules($('rulesEditor').value));
   $('resetRulesButton').addEventListener('click', () => {
-    $('rulesEditor').value = defaultRules;
-    try { localStorage.removeItem(WORKSHOP_STORE + '-rules'); } catch { /* ignore */ }
-    runRules(defaultRules, true);
-    $('rulesMessage').textContent = 'Aturan dikembalikan ke bawaan.';
+    $('rulesEditor').value = defaultParams;
+    try { localStorage.removeItem(WORKSHOP_STORE + '-params'); } catch { /* ignore */ }
+    runRules(defaultParams, true);
+    $('rulesMessage').textContent = 'Angka dikembalikan ke bawaan.';
   });
   $('rulesEditor').addEventListener('keydown', (e) => {
     if (e.key === 'Tab') { e.preventDefault(); const t = e.target; const s = t.selectionStart; t.setRangeText('    ', s, t.selectionEnd, 'end'); }

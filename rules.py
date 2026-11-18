@@ -9,6 +9,7 @@
 # ------------------------------------------------------------
 import math
 
+# === PARAMETER ===
 # Jarak jempol (4) ke telunjuk (8), dibagi ukuran telapak (0 -> 9).
 # Makin kecil angkanya, makin rapat jepitan yang diminta.
 JARAK_MAKS = 0.45
@@ -18,6 +19,7 @@ SUDUT_MIN = 15
 
 # Contoh angka di atas masih tebakan awal.
 # Nanti disetel ulang pakai rekaman tangan teman yang jago crochet.
+# === END PARAMETER ===
 
 
 def jarak(a, b):
