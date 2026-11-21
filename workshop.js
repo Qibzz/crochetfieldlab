@@ -10,6 +10,7 @@ const PYODIDE = 'https://cdn.jsdelivr.net/npm/pyodide@314.0.8/';
 const COURSE_STORE = 'crochet-field-lab-progress-v1'; // shared with app.js (journal)
 const WORKSHOP_STORE = 'crochetpy-workshop-v1';       // player name, hand, level
 const HOLD_MS = 3000;          // pose must stay OK this long
+const GRACE_MS = 600;          // short detection drop-outs (a lost frame) don't reset the hold
 const TRACK_EVERY_MS = 100;    // ~10 checks per second
 const CHAIN_TARGET = 11;
 const GUIDE_DIR = 'guide/'; // put guide/level-0.jpg ... level-5.jpg (photos or GIFs of the coach's hands)
@@ -155,6 +156,7 @@ let lastRun = 0;
 let lastVideoTime = -1;
 let holdStart = 0;
 let holdDone = false;
+let lastOkAt = 0;
 
 async function loadLandmarker() {
   const mod = await import(TASKS_VISION + '/vision_bundle.mjs');
@@ -253,7 +255,8 @@ function updateStatus(ok, msg, hands, pts, now) {
   } else metric.hidden = true;
 
   if (holdDone) return;
-  if (ok) { holdStart = holdStart || now; } else { holdStart = 0; }
+  if (ok) { holdStart = holdStart || now; lastOkAt = now; }
+  else if (now - lastOkAt > GRACE_MS) { holdStart = 0; }
   const progress = holdStart ? Math.min(1, (now - holdStart) / HOLD_MS) : 0;
   setHold(progress);
   if (progress >= 1) {
@@ -291,7 +294,7 @@ function renderLevels() {
   $('chainCard').hidden = !lv.chains;
   $('coachButton').disabled = true;
   $('coachHint').textContent = lv.coach ? 'Tahan posisi 3 detik dulu, lalu panggil coach.' : 'Level ini naik otomatis setelah tahan 3 detik.';
-  holdStart = 0; holdDone = player.level >= LEVELS.length; setHold(0);
+  holdStart = 0; lastOkAt = 0; holdDone = player.level >= LEVELS.length; setHold(0);
   renderChains();
 }
 
