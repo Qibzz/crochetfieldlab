@@ -170,6 +170,51 @@
     <div class="bricks" aria-hidden="true"></div>
   </section>
 
+  <!-- FINISH -->
+  <section id="finishScreen" class="screen finish" hidden aria-labelledby="finishTitle">
+    <div class="finish-inner">
+      <div class="stars" aria-hidden="true"><i></i><i class="pink"></i><i></i></div>
+      <p class="kicker light">SEMUA LEVEL CLEAR · <span id="finishName">PLAYER</span></p>
+      <h1 id="finishTitle" class="pop">SEPUH!</h1>
+      <p class="finish-msg">Waw kamu sudah sepuh dan siap lanjut ke workshop yang lebih advance!! Selamat</p>
+      <div class="card finish-stats">
+        <div><span class="hud-label dark">LEVEL CLEAR</span><span class="stat-num">6 / 6</span></div>
+        <div><span class="hud-label dark">CHAIN</span><span id="finishChains" class="stat-num">0</span></div>
+      </div>
+      <div class="row center">
+        <button id="replayButton" type="button" class="btn btn-light big">↺ ULANGI PERMAINAN</button>
+        <button id="boothOpenButton" type="button" class="btn btn-gold big">SHARE PROGRES ▶</button>
+      </div>
+    </div>
+    <div class="bricks" aria-hidden="true"></div>
+  </section>
+
+  <!-- PHOTO BOOTH -->
+  <section id="boothScreen" class="screen booth" hidden aria-labelledby="boothTitle">
+    <header class="hud">
+      <h1 id="boothTitle" class="booth-title">PHOTO BOOTH</h1>
+      <span class="logo">crochet<span class="accent-soft">.py</span></span>
+    </header>
+    <main class="booth-main">
+      <div class="booth-frame">
+        <video id="boothVideo" autoplay muted playsinline hidden></video>
+        <canvas id="boothCanvas" aria-label="Pratinjau foto dengan bingkai crochet.py"></canvas>
+        <img id="boothPhoto" alt="Foto kamu dengan bingkai crochet.py" hidden />
+      </div>
+      <p id="boothStatus" class="booth-status" aria-live="polite"></p>
+      <div id="boothBefore" class="row center">
+        <button id="shootButton" type="button" class="btn btn-gold big">📸 AMBIL FOTO</button>
+      </div>
+      <div id="boothAfter" class="row center" hidden>
+        <button id="downloadButton" type="button" class="btn btn-gold">⬇ DOWNLOAD</button>
+        <button id="shareButton" type="button" class="btn btn-accent" hidden>SHARE</button>
+        <button id="retakeButton" type="button" class="btn btn-light">FOTO ULANG</button>
+      </div>
+      <button id="boothBack" type="button" class="btn btn-light">◀ KEMBALI</button>
+    </main>
+    <div class="bricks" aria-hidden="true"></div>
+  </section>
+
   <!-- LEVEL UP -->
   <div id="levelUp" class="levelup" hidden role="dialog" aria-modal="true" aria-labelledby="levelUpTitle">
     <div class="levelup-inner">
