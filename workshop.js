@@ -518,30 +518,16 @@ function drawFrame(ctx, S) {
   ctx.textBaseline = 'middle';
   const font = (px) => `${px}px "Press Start 2P", monospace`;
 
-  // title plate on the floor (shifted right to leave room for the SEPUH stamp)
+  // title plate on the floor
   ctx.font = font(52);
   const title = 'crochet.py';
   const tw = ctx.measureText(title).width;
-  const px = 230, py = fy + 34, ph = 100;
+  const px = 60, py = fy + 34, ph = 100;
   ctx.fillStyle = INK; ctx.fillRect(px + 10, py + 10, tw + 60, ph);
   ctx.fillStyle = SKY; ctx.fillRect(px, py, tw + 60, ph);
   ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.strokeRect(px, py, tw + 60, ph);
   ctx.fillStyle = INK; ctx.fillText('crochet', px + 30, py + ph / 2 + 4);
   ctx.fillStyle = PINK; ctx.fillText('.py', px + 30 + ctx.measureText('crochet').width, py + ph / 2 + 4);
-
-  // SEPUH! stamp, diagonal, bottom-left corner
-  ctx.save();
-  ctx.translate(120, fy + 40);
-  ctx.rotate(-Math.PI / 7);
-  ctx.font = font(40);
-  const st = 'SEPUH!';
-  const sw = ctx.measureText(st).width + 40, sh = 74;
-  ctx.fillStyle = INK; ctx.fillRect(-sw / 2 + 8, -sh / 2 + 8, sw, sh);
-  ctx.fillStyle = GOLD; ctx.fillRect(-sw / 2, -sh / 2, sw, sh);
-  ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.strokeRect(-sw / 2, -sh / 2, sw, sh);
-  ctx.fillStyle = PINK; ctx.textAlign = 'center'; ctx.fillText(st, 0, 4);
-  ctx.restore();
-  ctx.textAlign = 'left';
 
   // name + clear count on the right of the floor
   ctx.font = font(22); ctx.textAlign = 'right';
@@ -601,7 +587,6 @@ function takePhoto() {
       img.hidden = false; canvas.hidden = true;
       $('boothBefore').hidden = true; $('boothAfter').hidden = false;
       $('shootButton').disabled = false;
-      $('shareHint').textContent = '';
       $('boothStatus').textContent = 'Cekrek! Fotomu siap dibagikan.';
     }, 'image/png');
   }, 1000);
@@ -615,23 +600,6 @@ function downloadPhoto() {
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
-
-const SHARE_TEXT = 'Aku sudah SEPUH di workshop crochet.py · 10 tahun Python Jogja! 🧶🐍';
-const SHARE_URL = 'https://github.com/kaylaque/crochetfieldlab';
-const photoFile = () => new File([photoBlob], 'crochetpy.png', { type: 'image/png' });
-
-function openApp(url, hint) {
-  downloadPhoto();
-  window.open(url, '_blank', 'noopener');
-  $('shareHint').textContent = hint;
-}
-
-const shareTargets = {
-  shareWa: () => openApp(`https://wa.me/?text=${encodeURIComponent(SHARE_TEXT)}`, 'Foto ter-download. Lampirkan fotonya di chat WhatsApp ya.'),
-  shareIg: () => openApp('https://www.instagram.com/', 'Foto ter-download. Upload ke post atau story Instagram, jangan lupa tag PyLadies dan Python Jogja!'),
-  shareTiktok: () => openApp('https://www.tiktok.com/upload', 'Foto ter-download. Upload sebagai foto di TikTok.'),
-  shareLinkedin: () => openApp(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SHARE_URL)}`, 'Foto ter-download. Tambahkan fotonya ke post LinkedIn.'),
-};
 
 function retakePhoto() {
   $('boothPhoto').hidden = true; $('boothCanvas').hidden = false;
@@ -725,7 +693,6 @@ function init() {
   $('shootButton').addEventListener('click', takePhoto);
   $('downloadButton').addEventListener('click', downloadPhoto);
   $('retakeButton').addEventListener('click', retakePhoto);
-  for (const [id, fn] of Object.entries(shareTargets)) $(id).addEventListener('click', fn);
   $('boothFlip').addEventListener('click', () => {
     boothFlipped = !boothFlipped;
     $('boothFlip').setAttribute('aria-pressed', String(boothFlipped));
