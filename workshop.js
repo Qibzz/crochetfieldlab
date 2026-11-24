@@ -424,6 +424,16 @@ let logoImg = null;
 let photoBlob = null;
 let boothFlipped = false;
 
+// Photo filters. Canvas filters work in Chrome/Edge/Firefox; where unsupported the photo stays natural.
+const FILTERS = {
+  normal: { base: 'none' },
+  cerah:  { base: 'brightness(1.1) contrast(1.06) saturate(1.15)' },
+  glow:   { base: 'brightness(1.12) contrast(0.96) saturate(1.1)', glow: 0.35 },
+  pink:   { base: 'brightness(1.08) saturate(1.2)', tint: 'rgba(255,120,180,0.16)', glow: 0.2 },
+  retro:  { base: 'sepia(0.35) contrast(1.1) saturate(1.3) brightness(1.03)', tint: 'rgba(255,190,120,0.10)' },
+};
+const currentFilter = () => FILTERS[document.querySelector('input[name=filter]:checked')?.value] || FILTERS.cerah;
+
 function loadLogo() {
   if (logoImg) return Promise.resolve(logoImg);
   return new Promise((resolve) => {
@@ -468,7 +478,18 @@ function drawBooth(canvas) {
     const w = v.videoWidth * scale, h = v.videoHeight * scale;
     ctx.save();
     if (boothFlipped) { ctx.translate(S, 0); ctx.scale(-1, 1); }
-    ctx.drawImage(v, (S - w) / 2, (S - h) / 2, w, h);
+    const f = currentFilter();
+    const dx = (S - w) / 2, dy = (S - h) / 2;
+    ctx.filter = f.base;
+    ctx.drawImage(v, dx, dy, w, h);
+    if (f.glow) {                       // soft skin glow: blurred copy screened on top
+      ctx.globalAlpha = f.glow; ctx.globalCompositeOperation = 'screen';
+      ctx.filter = `${f.base === 'none' ? '' : f.base} blur(10px)`.trim();
+      ctx.drawImage(v, dx, dy, w, h);
+      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    }
+    ctx.filter = 'none';
+    if (f.tint) { ctx.globalCompositeOperation = 'soft-light'; ctx.fillStyle = f.tint; ctx.fillRect(0, 0, S, S); ctx.globalCompositeOperation = 'source-over'; }
     ctx.restore();
   }
   drawFrame(ctx, S);
@@ -599,18 +620,6 @@ const SHARE_TEXT = 'Aku sudah SEPUH di workshop crochet.py · 10 tahun Python Jo
 const SHARE_URL = 'https://github.com/kaylaque/crochetfieldlab';
 const photoFile = () => new File([photoBlob], 'crochetpy.png', { type: 'image/png' });
 
-// System share sheet: on phones (and Chrome/Edge on Windows) it lists IG, WA, TikTok, LinkedIn if installed.
-async function sharePhoto() {
-  if (!photoBlob) return;
-  const file = photoFile();
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try { await navigator.share({ files: [file], title: 'crochet.py', text: SHARE_TEXT }); return; }
-    catch (err) { if (err?.name === 'AbortError') return; }
-  }
-  downloadPhoto();
-  $('shareHint').textContent = 'Browser ini belum bisa share langsung. Foto sudah ter-download, tinggal pilih aplikasi di bawah.';
-}
-
 function openApp(url, hint) {
   downloadPhoto();
   window.open(url, '_blank', 'noopener');
@@ -715,7 +724,6 @@ function init() {
   $('boothOpenButton').addEventListener('click', openBooth);
   $('shootButton').addEventListener('click', takePhoto);
   $('downloadButton').addEventListener('click', downloadPhoto);
-  $('shareButton').addEventListener('click', sharePhoto);
   $('retakeButton').addEventListener('click', retakePhoto);
   for (const [id, fn] of Object.entries(shareTargets)) $(id).addEventListener('click', fn);
   $('boothFlip').addEventListener('click', () => {

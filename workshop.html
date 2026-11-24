@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="workshop.css" />
+  <link rel="stylesheet" href="workshop.css?v=5" />
 </head>
 <body>
   <!-- WELCOME -->
@@ -208,10 +208,17 @@
         <div id="boothBefore" class="booth-actions">
           <button id="shootButton" type="button" class="btn btn-gold big">📸 AMBIL FOTO</button>
           <button id="boothFlip" type="button" class="btn btn-light" aria-pressed="false">⇋ FLIP KAMERA</button>
+          <fieldset class="filters">
+            <legend>FILTER</legend>
+            <label class="choice"><input type="radio" name="filter" value="normal" /> NORMAL</label>
+            <label class="choice"><input type="radio" name="filter" value="cerah" checked /> CERAH</label>
+            <label class="choice"><input type="radio" name="filter" value="glow" /> SOFT GLOW</label>
+            <label class="choice"><input type="radio" name="filter" value="pink" /> PINKY</label>
+            <label class="choice"><input type="radio" name="filter" value="retro" /> RETRO</label>
+          </fieldset>
         </div>
         <div id="boothAfter" class="booth-actions" hidden>
-          <button id="shareButton" type="button" class="btn btn-accent big">SHARE ▶</button>
-          <p class="hint dark">Atau langsung ke:</p>
+          <p class="hint dark">Bagikan ke:</p>
           <div class="share-grid">
             <button id="shareWa" type="button" class="btn btn-light">WHATSAPP</button>
             <button id="shareIg" type="button" class="btn btn-light">INSTAGRAM</button>
@@ -241,6 +248,6 @@
   </div>
 
   <script src="course-video.js"></script>
-  <script src="workshop.js" type="module"></script>
+  <script src="workshop.js?v=5" type="module"></script>
 </body>
 </html>
