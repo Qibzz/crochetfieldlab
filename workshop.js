@@ -422,6 +422,7 @@ const BOOTH_SIZE = 1080;
 let boothRaf = 0;
 let logoImg = null;
 let photoBlob = null;
+let boothFlipped = false;
 
 function loadLogo() {
   if (logoImg) return Promise.resolve(logoImg);
@@ -437,6 +438,8 @@ async function openBooth() {
   $('finishScreen').hidden = true; $('boothScreen').hidden = false;
   $('boothPhoto').hidden = true; $('boothCanvas').hidden = false;
   $('boothAfter').hidden = true; $('boothBefore').hidden = false;
+  boothFlipped = $('cameraBox').classList.contains('flipped');
+  $('boothFlip').setAttribute('aria-pressed', String(boothFlipped));
   $('boothStatus').textContent = 'Menyalakan kamera…';
   await Promise.all([loadLogo(), document.fonts?.load?.('24px "Press Start 2P"').catch(() => {})]);
   try {
@@ -464,7 +467,7 @@ function drawBooth(canvas) {
     const scale = Math.max(S / v.videoWidth, S / v.videoHeight);
     const w = v.videoWidth * scale, h = v.videoHeight * scale;
     ctx.save();
-    if ($('cameraBox').classList.contains('flipped')) { ctx.translate(S, 0); ctx.scale(-1, 1); }
+    if (boothFlipped) { ctx.translate(S, 0); ctx.scale(-1, 1); }
     ctx.drawImage(v, (S - w) / 2, (S - h) / 2, w, h);
     ctx.restore();
   }
@@ -494,21 +497,35 @@ function drawFrame(ctx, S) {
   ctx.textBaseline = 'middle';
   const font = (px) => `${px}px "Press Start 2P", monospace`;
 
-  // title plate on the floor
+  // title plate on the floor (shifted right to leave room for the SEPUH stamp)
   ctx.font = font(52);
   const title = 'crochet.py';
   const tw = ctx.measureText(title).width;
-  const px = 60, py = fy + 34, ph = 100;
+  const px = 230, py = fy + 34, ph = 100;
   ctx.fillStyle = INK; ctx.fillRect(px + 10, py + 10, tw + 60, ph);
   ctx.fillStyle = SKY; ctx.fillRect(px, py, tw + 60, ph);
   ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.strokeRect(px, py, tw + 60, ph);
   ctx.fillStyle = INK; ctx.fillText('crochet', px + 30, py + ph / 2 + 4);
   ctx.fillStyle = PINK; ctx.fillText('.py', px + 30 + ctx.measureText('crochet').width, py + ph / 2 + 4);
 
-  // name + badge on the right of the floor
+  // SEPUH! stamp, diagonal, bottom-left corner
+  ctx.save();
+  ctx.translate(120, fy + 40);
+  ctx.rotate(-Math.PI / 7);
+  ctx.font = font(40);
+  const st = 'SEPUH!';
+  const sw = ctx.measureText(st).width + 40, sh = 74;
+  ctx.fillStyle = INK; ctx.fillRect(-sw / 2 + 8, -sh / 2 + 8, sw, sh);
+  ctx.fillStyle = GOLD; ctx.fillRect(-sw / 2, -sh / 2, sw, sh);
+  ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.strokeRect(-sw / 2, -sh / 2, sw, sh);
+  ctx.fillStyle = PINK; ctx.textAlign = 'center'; ctx.fillText(st, 0, 4);
+  ctx.restore();
+  ctx.textAlign = 'left';
+
+  // name + clear count on the right of the floor
   ctx.font = font(22); ctx.textAlign = 'right';
   ctx.fillStyle = WHITE; ctx.fillText((player.name || 'PLAYER').toUpperCase(), S - 60, fy + 60);
-  ctx.fillStyle = GOLD; ctx.fillText(`★ SEPUH · ${LEVELS.length}/${LEVELS.length} CLEAR`, S - 60, fy + 110);
+  ctx.fillStyle = GOLD; ctx.fillText(`★ ${LEVELS.length}/${LEVELS.length} CLEAR`, S - 60, fy + 110);
   ctx.textAlign = 'left';
 
   // PyLadies logo badge (top-left)
@@ -540,14 +557,21 @@ function drawFrame(ctx, S) {
 function takePhoto() {
   let n = 3;
   $('shootButton').disabled = true;
-  $('boothStatus').textContent = `${n}…`;
+  const count = $('boothCount');
+  count.hidden = false; count.textContent = String(n);
+  $('boothStatus').textContent = 'Siap-siap…';
   const t = setInterval(() => {
     n -= 1;
-    if (n > 0) { $('boothStatus').textContent = `${n}…`; return; }
+    if (n > 0) { count.textContent = String(n); return; }
     clearInterval(t);
+    count.hidden = true;
     cancelAnimationFrame(boothRaf);
     const canvas = $('boothCanvas');
     drawBooth(canvas);
+    // black screen + white flash
+    const flash = $('boothFlash');
+    flash.hidden = true; void flash.offsetWidth; flash.hidden = false;
+    setTimeout(() => { flash.hidden = true; }, 750);
     canvas.toBlob((blob) => {
       photoBlob = blob;
       const img = $('boothPhoto');
@@ -556,9 +580,8 @@ function takePhoto() {
       img.hidden = false; canvas.hidden = true;
       $('boothBefore').hidden = true; $('boothAfter').hidden = false;
       $('shootButton').disabled = false;
-      $('boothStatus').textContent = 'Cekrek! Download atau share fotomu.';
-      const canShare = !!(navigator.canShare && navigator.canShare({ files: [new File([blob], 'crochetpy.png', { type: 'image/png' })] }));
-      $('shareButton').hidden = !canShare;
+      $('shareHint').textContent = '';
+      $('boothStatus').textContent = 'Cekrek! Fotomu siap dibagikan.';
     }, 'image/png');
   }, 1000);
 }
@@ -572,12 +595,34 @@ function downloadPhoto() {
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 
+const SHARE_TEXT = 'Aku sudah SEPUH di workshop crochet.py · 10 tahun Python Jogja! 🧶🐍';
+const SHARE_URL = 'https://github.com/kaylaque/crochetfieldlab';
+const photoFile = () => new File([photoBlob], 'crochetpy.png', { type: 'image/png' });
+
+// System share sheet: on phones (and Chrome/Edge on Windows) it lists IG, WA, TikTok, LinkedIn if installed.
 async function sharePhoto() {
   if (!photoBlob) return;
-  const file = new File([photoBlob], 'crochetpy.png', { type: 'image/png' });
-  try { await navigator.share({ files: [file], title: 'crochet.py', text: 'Aku sudah sepuh di workshop crochet.py · 10 tahun Python Jogja! 🧶🐍' }); }
-  catch { /* user cancelled */ }
+  const file = photoFile();
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'crochet.py', text: SHARE_TEXT }); return; }
+    catch (err) { if (err?.name === 'AbortError') return; }
+  }
+  downloadPhoto();
+  $('shareHint').textContent = 'Browser ini belum bisa share langsung. Foto sudah ter-download, tinggal pilih aplikasi di bawah.';
 }
+
+function openApp(url, hint) {
+  downloadPhoto();
+  window.open(url, '_blank', 'noopener');
+  $('shareHint').textContent = hint;
+}
+
+const shareTargets = {
+  shareWa: () => openApp(`https://wa.me/?text=${encodeURIComponent(SHARE_TEXT)}`, 'Foto ter-download. Lampirkan fotonya di chat WhatsApp ya.'),
+  shareIg: () => openApp('https://www.instagram.com/', 'Foto ter-download. Upload ke post atau story Instagram, jangan lupa tag PyLadies dan Python Jogja!'),
+  shareTiktok: () => openApp('https://www.tiktok.com/upload', 'Foto ter-download. Upload sebagai foto di TikTok.'),
+  shareLinkedin: () => openApp(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SHARE_URL)}`, 'Foto ter-download. Tambahkan fotonya ke post LinkedIn.'),
+};
 
 function retakePhoto() {
   $('boothPhoto').hidden = true; $('boothCanvas').hidden = false;
@@ -672,6 +717,11 @@ function init() {
   $('downloadButton').addEventListener('click', downloadPhoto);
   $('shareButton').addEventListener('click', sharePhoto);
   $('retakeButton').addEventListener('click', retakePhoto);
+  for (const [id, fn] of Object.entries(shareTargets)) $(id).addEventListener('click', fn);
+  $('boothFlip').addEventListener('click', () => {
+    boothFlipped = !boothFlipped;
+    $('boothFlip').setAttribute('aria-pressed', String(boothFlipped));
+  });
   $('boothBack').addEventListener('click', closeBooth);
   document.addEventListener('visibilitychange', () => { if (document.hidden) cancelAnimationFrame(rafId); else if (stream && landmarker) { cancelAnimationFrame(rafId); loop(); } });
 

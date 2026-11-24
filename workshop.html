@@ -176,7 +176,7 @@
       <div class="stars" aria-hidden="true"><i></i><i class="pink"></i><i></i></div>
       <p class="kicker light">SEMUA LEVEL CLEAR · <span id="finishName">PLAYER</span></p>
       <h1 id="finishTitle" class="pop">SEPUH!</h1>
-      <p class="finish-msg">Waw kamu sudah sepuh dan siap lanjut ke workshop yang lebih advance!! Selamat</p>
+      <p class="finish-msg">Waw, kamu sudah sepuh dan siap lanjut ke workshop yang lebih advance!! Selamat🤩</p>
       <div class="card finish-stats">
         <div><span class="hud-label dark">LEVEL CLEAR</span><span class="stat-num">6 / 6</span></div>
         <div><span class="hud-label dark">CHAIN</span><span id="finishChains" class="stat-num">0</span></div>
@@ -200,17 +200,32 @@
         <video id="boothVideo" autoplay muted playsinline hidden></video>
         <canvas id="boothCanvas" aria-label="Pratinjau foto dengan bingkai crochet.py"></canvas>
         <img id="boothPhoto" alt="Foto kamu dengan bingkai crochet.py" hidden />
+        <div id="boothFlash" class="booth-flash" hidden></div>
+        <span id="boothCount" class="booth-count" hidden></span>
       </div>
-      <p id="boothStatus" class="booth-status" aria-live="polite"></p>
-      <div id="boothBefore" class="row center">
-        <button id="shootButton" type="button" class="btn btn-gold big">📸 AMBIL FOTO</button>
+      <div class="booth-side">
+        <p id="boothStatus" class="booth-status" aria-live="polite"></p>
+        <div id="boothBefore" class="booth-actions">
+          <button id="shootButton" type="button" class="btn btn-gold big">📸 AMBIL FOTO</button>
+          <button id="boothFlip" type="button" class="btn btn-light" aria-pressed="false">⇋ FLIP KAMERA</button>
+        </div>
+        <div id="boothAfter" class="booth-actions" hidden>
+          <button id="shareButton" type="button" class="btn btn-accent big">SHARE ▶</button>
+          <p class="hint dark">Atau langsung ke:</p>
+          <div class="share-grid">
+            <button id="shareWa" type="button" class="btn btn-light">WHATSAPP</button>
+            <button id="shareIg" type="button" class="btn btn-light">INSTAGRAM</button>
+            <button id="shareTiktok" type="button" class="btn btn-light">TIKTOK</button>
+            <button id="shareLinkedin" type="button" class="btn btn-light">LINKEDIN</button>
+          </div>
+          <p id="shareHint" class="hint dark" aria-live="polite"></p>
+          <div class="row">
+            <button id="downloadButton" type="button" class="btn btn-gold">⬇ DOWNLOAD</button>
+            <button id="retakeButton" type="button" class="btn btn-light">FOTO ULANG</button>
+          </div>
+        </div>
+        <button id="boothBack" type="button" class="btn btn-light">◀ KEMBALI</button>
       </div>
-      <div id="boothAfter" class="row center" hidden>
-        <button id="downloadButton" type="button" class="btn btn-gold">⬇ DOWNLOAD</button>
-        <button id="shareButton" type="button" class="btn btn-accent" hidden>SHARE</button>
-        <button id="retakeButton" type="button" class="btn btn-light">FOTO ULANG</button>
-      </div>
-      <button id="boothBack" type="button" class="btn btn-light">◀ KEMBALI</button>
     </main>
     <div class="bricks" aria-hidden="true"></div>
   </section>
