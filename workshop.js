@@ -426,12 +426,47 @@ let boothFlipped = false;
 
 // Photo filters. Canvas filters work in Chrome/Edge/Firefox; where unsupported the photo stays natural.
 const FILTERS = {
-  normal: { base: 'none' },
-  cerah:  { base: 'brightness(1.1) contrast(1.06) saturate(1.15)' },
-  glow:   { base: 'brightness(1.12) contrast(0.96) saturate(1.1)', glow: 0.35 },
-  pink:   { base: 'brightness(1.08) saturate(1.2)', tint: 'rgba(255,120,180,0.16)', glow: 0.2 },
-  retro:  { base: 'sepia(0.35) contrast(1.1) saturate(1.3) brightness(1.03)', tint: 'rgba(255,190,120,0.10)' },
+  normal: { base: 'none', manual: null },
+  cerah:  { base: 'brightness(1.1) contrast(1.06) saturate(1.15)', manual: { b: 1.1, c: 1.06, s: 1.15 } },
+  glow:   { base: 'brightness(1.12) contrast(0.96) saturate(1.1)', glow: 0.35, manual: { b: 1.16, c: 0.92, s: 1.1 } },
+  pink:   { base: 'brightness(1.08) saturate(1.2)', tint: 'rgba(255,120,180,0.16)', glow: 0.2, manual: { b: 1.1, s: 1.2, tint: [255, 120, 180, 0.1] } },
+  retro:  { base: 'sepia(0.35) contrast(1.1) saturate(1.3) brightness(1.03)', tint: 'rgba(255,190,120,0.10)', manual: { p: 0.35, c: 1.1, s: 1.3, b: 1.03, tint: [255, 190, 120, 0.06] } },
 };
+
+// Older Safari ignores ctx.filter. Detect it once and fall back to per-pixel math.
+let canvasFilterOk = null;
+function supportsCanvasFilter() {
+  if (canvasFilterOk === null) {
+    try {
+      const c = document.createElement('canvas'); c.width = c.height = 1;
+      const x = c.getContext('2d');
+      x.filter = 'brightness(0)'; x.fillStyle = '#fff'; x.fillRect(0, 0, 1, 1);
+      canvasFilterOk = 'filter' in x && x.getImageData(0, 0, 1, 1).data[0] < 10;
+    } catch { canvasFilterOk = false; }
+  }
+  return canvasFilterOk;
+}
+
+function applyManualFilter(ctx, S, m) {
+  const img = ctx.getImageData(0, 0, S, S); const d = img.data;
+  const b = m.b ?? 1, c = m.c ?? 1, s = m.s ?? 1, p = m.p ?? 0;
+  const [tr, tg, tb, ta] = m.tint || [0, 0, 0, 0];
+  for (let i = 0; i < d.length; i += 4) {
+    let r = d[i] * b, g = d[i + 1] * b, bl = d[i + 2] * b;
+    r = (r - 128) * c + 128; g = (g - 128) * c + 128; bl = (bl - 128) * c + 128;
+    const gray = 0.299 * r + 0.587 * g + 0.114 * bl;
+    r = gray + (r - gray) * s; g = gray + (g - gray) * s; bl = gray + (bl - gray) * s;
+    if (p) {
+      const sr = 0.393 * r + 0.769 * g + 0.189 * bl, sg = 0.349 * r + 0.686 * g + 0.168 * bl, sb = 0.272 * r + 0.534 * g + 0.131 * bl;
+      r += (sr - r) * p; g += (sg - g) * p; bl += (sb - bl) * p;
+    }
+    if (ta) { r += (tr - r) * ta; g += (tg - g) * ta; bl += (tb - bl) * ta; }
+    d[i] = r < 0 ? 0 : r > 255 ? 255 : r;
+    d[i + 1] = g < 0 ? 0 : g > 255 ? 255 : g;
+    d[i + 2] = bl < 0 ? 0 : bl > 255 ? 255 : bl;
+  }
+  ctx.putImageData(img, 0, 0);
+}
 const currentFilter = () => FILTERS[document.querySelector('input[name=filter]:checked')?.value] || FILTERS.cerah;
 
 function loadLogo() {
@@ -480,6 +515,13 @@ function drawBooth(canvas) {
     if (boothFlipped) { ctx.translate(S, 0); ctx.scale(-1, 1); }
     const f = currentFilter();
     const dx = (S - w) / 2, dy = (S - h) / 2;
+    if (!supportsCanvasFilter()) {
+      ctx.drawImage(v, dx, dy, w, h);
+      ctx.restore();
+      if (f.manual) applyManualFilter(ctx, S, f.manual);
+      drawFrame(ctx, S);
+      return;
+    }
     ctx.filter = f.base;
     ctx.drawImage(v, dx, dy, w, h);
     if (f.glow) {                       // soft skin glow: blurred copy screened on top
